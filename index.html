@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Kosztorys Domu</title>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+html, body {
+  margin:0; padding:0;
+  width:100%; height:100%;
+  overflow:hidden;
+  background: linear-gradient(to top, #fff5f8, #ffe6f2);
+  font-family: Arial, sans-serif;
+  position: relative;
+}
+h1 {
+  position:absolute; top:10%; width:100%;
+  text-align:center; font-size:3.5em;
+  color:#ff1493;
+  font-family: 'Great Vibes', cursive;
+  text-shadow: 2px 2px 5px #ffb6c1;
+  z-index:10; transition:opacity 0.7s;
+}
+button {
+  padding:15px 35px; font-size:1.4em;
+  border:none; border-radius:12px;
+  cursor:pointer; position:absolute;
+  color:white; font-weight:bold;
+  z-index:10; transition:transform 0.3s, box-shadow 0.3s;
+}
+#yes {background-color:#ff69b4; left:30%; bottom:15%;}
+#yes:hover {transform:scale(1.2); box-shadow:0 0 20px #fff;}
+#no {background-color:#ff4500; left:60%; bottom:15%;}
+.heart,.confetti,.star {
+  position:absolute; pointer-events:none; user-select:none; z-index:5;
+}
+.confetti {font-size:18px;}
+.heart {font-size:25px;}
+.star {font-size:18px; color: #fff;}
+#bearStatic {
+  position:absolute; bottom:0; width:150px; opacity:0.9;
+  pointer-events:none; left:50%; transform:translateX(-50%);
+  z-index:3;
+}
+#bearStart, #bearYes {
+  position:absolute; top:25%; left:50%; transform:translateX(-50%);
+  width:250px; z-index:10; /* GIF większy */
+}
+#bearYes { display:none; }
+@keyframes pulse{0%{transform:scale(1);box-shadow:0 0 5px #fff;}50%{transform:scale(1.2);box-shadow:0 0 20px #fff;}100%{transform:scale(1);box-shadow:0 0 5px #fff;}}
+</style>
+</head>
+<body>
+
+<h1 id="mainText">Zuzia, czy zostaniesz moją Walentynką? 💖</h1>
+<button id="yes">YES</button>
+<button id="no">NO</button>
+
+<!-- Statyczny miś w tle -->
+<img id="bearStatic" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAA..." alt="Miś">
+
+<!-- GIF startowy nad przyciskami -->
+<img id="bearStart" src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExdndnNnpla2M5bWFtbHE0dTBhdXg0dWdtaDExbW03NGh4OTFlcGtiaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5PhYotn1t5s0M10Aly/giphy.gif" alt="Miś startowy">
+
+<!-- GIF po kliknięciu YES -->
+<img id="bearYes" src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMWRma2YyMjF2cHg4a2o4N3VsMWt4dTk0b2R1aDl0cTM3cWcxZGRjayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/tJJ7L31VvDa9PKjyT6/giphy.gif" alt="Miś po kliknięciu YES">
+
+<script>
+const yesButton=document.getElementById('yes');
+const noButton=document.getElementById('no');
+const bearStatic=document.getElementById('bearStatic');
+const bearStart=document.getElementById('bearStart');
+const bearYes=document.getElementById('bearYes');
+const mainText=document.getElementById('mainText');
+let noClicks=0;
+
+function random(min,max){return Math.random()*(max-min)+min;}
+
+// Tworzenie serc
+function createHeart(fromTop=false){
+  const heart=document.createElement('div');
+  heart.className='heart';
+  heart.textContent='❤️';
+  heart.style.fontSize=random(20,35)+'px';
+  heart.style.top=fromTop?'-40px':window.innerHeight+'px';
+  heart.style.left=random(0,window.innerWidth)+'px';
+  document.body.appendChild(heart);
+  let topPos=parseFloat(heart.style.top);
+  const float=setInterval(()=>{
+    topPos-=random(2,5);
+    heart.style.top=topPos+'px';
+    heart.style.left=(parseFloat(heart.style.left)+random(-2,2))+'px';
+    if(topPos<-50){clearInterval(float); heart.remove();}
+  },25);
+}
+
+// Tworzenie konfetti
+function createConfetti(){
+  const confetti=document.createElement('div');
+  confetti.className='confetti';
+  const colors=['#ff0a54','#ff477e','#ff7096','#ff85a1','#fbb1b1','#f9bec7'];
+  confetti.textContent='🎉';
+  confetti.style.color=colors[Math.floor(Math.random()*colors.length)];
+  confetti.style.fontSize=random(15,22)+'px';
+  confetti.style.left=random(0,window.innerWidth)+'px';
+  confetti.style.top=window.innerHeight+'px';
+  document.body.appendChild(confetti);
+  let topPos=window.innerHeight;
+  const fall=setInterval(()=>{
+    topPos-=random(2,5);
+    confetti.style.top=topPos+'px';
+    confetti.style.left=(parseFloat(confetti.style.left)+random(-3,3))+'px';
+    if(topPos<-50){clearInterval(fall); confetti.remove();}
+  },25);
+}
+
+// Gwiazdki
+function createStar(){
+  const star=document.createElement('div');
+  star.className='star';
+  star.textContent='⭐';
+  star.style.left=random(0,window.innerWidth)+'px';
+  star.style.top=random(0,window.innerHeight)+'px';
+  document.body.appendChild(star);
+  setTimeout(()=>star.remove(),2000);
+}
+
+// Uciekający NO
+noButton.addEventListener('mouseenter',()=>{
+  if(noClicks<2){
+    noButton.style.left=random(0, window.innerWidth-80)+'px';
+    noButton.style.top=random(0, window.innerHeight-50)+'px';
+    noClicks++;
+  } else if(noClicks===2){
+    noButton.style.display='none';
+    noClicks++;
+  }
+});
+
+// Animacje w tle
+setInterval(createHeart,250);
+setInterval(createConfetti,300);
+setInterval(createStar,400);
+
+// Kliknięcie YES
+yesButton.addEventListener('click',()=>{
+  // 50 serc i konfetti
+  for(let i=0;i<50;i++){createHeart(); createConfetti();}
+
+  // Statyczny mis, GIF startowy znika, GIF po YES pojawia się
+  bearStatic.style.display='none';
+  bearStart.style.display='none';
+  bearYes.style.display='block';
+
+  // Zmiana tekstu
+  mainText.style.opacity=0;
+  setTimeout(()=>{
+    mainText.textContent="Dziękuję! Jesteś moją najcudowniejszą istotą 💖";
+    mainText.style.opacity=1;
+  },500);
+
+  // Dodatkowo 5 dużych statycznych serc po bokach
+  for(let i=0;i<5;i++){
+    const bigHeart=document.createElement('div');
+    bigHeart.className='heart';
+    bigHeart.textContent='❤️';
+    bigHeart.style.fontSize=random(50,70)+'px';
+    bigHeart.style.top=random(100,window.innerHeight-200)+'px';
+    bigHeart.style.left=i%2===0? '10%':'80%';
+    document.body.appendChild(bigHeart);
+    setTimeout(()=>bigHeart.remove(),4000);
+  }
+});
+
+yesButton.style.animation='pulse 1s infinite';
+</script>
+
+</body>
+</html>
